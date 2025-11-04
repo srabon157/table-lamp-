@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Table Lamp</title>
+    <style>
+        :root {
+            /* কমন ভ্যারিয়েবল ব্যবহার করা হলো */
+            --lamp-width: 320px;
+            --lamp-height: 400px;
+            --base-color: #6d4c41;
+            --stand-color: #bcaaa4;
+            --shade-off-color: #1a237e;
+            --light-on-color: #81d4fa;
+            --background-dark: #333333;
+            --background-light: #fcfcfc;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; 
+            min-height: 100vh;
+            background-color: var(--background-dark); 
+            margin: 0;
+            overflow: hidden;
+            transition: background-color 0.8s ease-in-out;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* যখন ল্যাম্প অন, তখন ব্যাকগ্রাউন্ড পরিবর্তন */
+        body.light-on {
+            background-color: var(--background-light); 
+        }
+
+        .scene-container {
+            position: relative;
+            margin-bottom: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lamp-container {
+            position: relative;
+            width: var(--lamp-width); 
+            height: var(--lamp-height);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            transition: transform 0.3s ease;
+        }
+
+        /* --- ল্যাম্পের বেস --- */
+        .base {
+            width: calc(var(--lamp-width) * 0.75);
+            height: 35px;
+            background-color: var(--base-color); 
+            border-radius: 50% / 18px; 
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+
+        /* বেসের উপরের রিং */
+        .base::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(var(--lamp-width) * 0.35);
+            height: 15px;
+            background-color: #8d6e63;
+            border-radius: 50% / 8px;
+        }
+
+        /* --- ল্যাম্পের স্ট্যান্ড --- */
+        .stand {
+            width: 18px;
+            height: 190px;
+            background-color: var(--stand-color);
+            border-radius: 5px;
+            margin-top: -10px; 
+            z-index: 1;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- ল্যাম্পের শেড (Light Cover) --- */
+        .shade {
+            width: var(--lamp-width); 
+            height: 140px; 
+            background-color: var(--shade-off-color); 
+            position: relative;
+            z-index: 3;
+            transition: background-color 0.5s ease-in-out;
+            /* শঙ্কু আকৃতির জন্য */
+            clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+        }
+
+        /* শেডের ভেতরের অংশ (আলোর উৎস) */
+        .shade-inner {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 15px;
+            background-color: rgba(255, 255, 255, 0.1); /* অফ মোডে অল্প আভা */
+            border-radius: 0 0 50% 50% / 0 0 10px 10px;
+            transition: background-color 0.5s;
+        }
+
+
+        /* --- আলোর প্রভাব (Light Effect) --- */
+        .light-beam {
+            width: 500px;
+            height: 350px;
+            background: radial-gradient(ellipse at top, rgba(255, 255, 180, 0) 5%, transparent 70%);
+            position: absolute;
+            top: 290px; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+            filter: blur(10px);
+            transition: background 0.8s ease-in-out;
+            pointer-events: none;
+            /* শঙ্কু আকৃতির আলোর জন্য */
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+        }
+
+        /* === ল্যাম্প যখন ON হবে, তখন CSS পরিবর্তন === */
+        .lamp-container.on .shade {
+            background-color: var(--light-on-color); /* অন হলে হালকা নীল/সাদা */
+        }
+        .lamp-container.on .shade-inner {
+            background-color: #ffeb3b; /* আলোর উৎস হলুদ */
+        }
+
+        .lamp-container.on .light-beam {
+            background: radial-gradient(ellipse at top, rgba(255, 255, 180, 0.8) 5%, transparent 70%);
+        }
+        
+        /* --- ল্যাম্পের নিচে টেবিল --- */
+        .table {
+            width: 600px;
+            height: 30px;
+            background-color: #5d4037;
+            border-radius: 10px 10px 0 0;
+            position: absolute;
+            bottom: 50px;
+            z-index: 0;
+        }
+
+        /* --- আলাদা সুইচ বাটন --- */
+        .on-off-switch {
+            width: 60px;
+            height: 30px;
+            background-color: #e57373; /* অফ মোডে লাল */
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            z-index: 5;
+        }
+
+        .lamp-container.on ~ .on-off-switch {
+            background-color: #66bb6a; /* অন মোডে সবুজ */
+        }
+
+        /* ==================================== */
+        /* === মোবাইল রেসপনসিভ (Media Query) === */
+        /* ==================================== */
+        @media (max-width: 600px) {
+            :root {
+                /* ছোট স্ক্রিনের জন্য মাপ পরিবর্তন */
+                --lamp-width: 200px;
+                --lamp-height: 250px;
+            }
+
+            .table {
+                width: 100%; /* টেবিল পুরো স্ক্রিন জুড়ে থাকবে */
+                bottom: 0px;
+            }
+
+            .scene-container {
+                margin-bottom: 0px; /* ল্যাম্প টেবিলের উপরে থাকবে */
+            }
+
+            .lamp-container {
+                /* ল্যাম্পের মূল পজিশন ছোট করা হলো */
+                height: var(--lamp-height);
+            }
+
+            .stand {
+                height: 100px; /* স্ট্যান্ড ছোট হলো */
+            }
+            
+            .shade {
+                height: 80px; /* শেড ছোট হলো */
+            }
+
+            .light-beam {
+                /* আলোর প্রভাব ছোট হলো এবং পজিশন পরিবর্তন */
+                width: 300px;
+                height: 200px;
+                top: 150px; 
+                filter: blur(5px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="table"></div>
+    
+    <div class="scene-container">
+        <div id="advancedLamp" class="lamp-container">
+            <div class="base"></div>
+            <div class="stand"></div>
+            <div class="shade">
+                <div class="shade-inner"></div>
+            </div>
+            <div class="light-beam"></div>
+        </div>
+
+        <div id="lampSwitch" class="on-off-switch">OFF</div>
+    </div>
+
+    <script>
+        const advancedLamp = document.getElementById('advancedLamp');
+        const lampSwitch = document.getElementById('lampSwitch');
+        const body = document.body;
+
+        function toggleLamp() {
+            // ল্যাম্প এবং বডি-র ক্লাস টগল করা হলো
+            advancedLamp.classList.toggle('on');
+            body.classList.toggle('light-on');
+
+            // সুইচের টেক্সট পরিবর্তন
+            if (advancedLamp.classList.contains('on')) {
+                lampSwitch.textContent = 'ON';
+            } else {
+                lampSwitch.textContent = 'OFF';
+            }
+        }
+        
+        // সুইচ বাটনে ক্লিক করলে ল্যাম্প অন/অফ হবে
+        lampSwitch.addEventListener('click', toggleLamp);
+
+        // শুরুতে ল্যাম্প অফ থাকবে
+        window.onload = () => {
+             lampSwitch.textContent = 'OFF';
+        };
+    </script>
+</body>
+</html>
